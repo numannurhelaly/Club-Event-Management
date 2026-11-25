@@ -67,3 +67,19 @@ form.inline { display: inline; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
 .form-grid .full { grid-column: 1 / -1; }
 .form-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Event list (members) */
+.filter-bar { display: flex; gap: 8px; margin: 0 0 16px; flex-wrap: wrap; }
+.filter-bar input, .filter-bar select { margin-top: 0; width: auto; flex: 1; min-width: 160px; }
+.filter-bar .btn { width: auto; }
+.event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.event-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; }
+.event-card h3 { margin: 8px 0 6px; font-size: 17px; }
+.event-card p { margin: 0 0 4px; }
+.event-card .desc { font-size: 14px; margin-top: 6px; }
+.event-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 12px; }
+.event-foot .seats { font-size: 13px; color: #667085; }
+.btn[disabled] { opacity: .6; cursor: not-allowed; }
+.badge-registered { background: #e8f5ec; color: #276738; }
+.badge-attended { background: #e6f1fb; color: #0c447c; }
+.badge-absent { background: #fdecec; color: #a32d2d; }

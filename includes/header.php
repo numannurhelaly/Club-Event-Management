@@ -14,6 +14,10 @@ $navUser = current_user();
   <nav class="nav">
     <a class="brand" href="dashboard.php">Club Events</a>
     <a href="dashboard.php">Dashboard</a>
+    <?php if ($navUser): ?>
+      <a href="events.php">Events</a>
+      <a href="my_registrations.php">My registrations</a>
+    <?php endif; ?>
     <?php if ($navUser && in_array($navUser['role'], ['admin', 'organizer'], true)): ?>
       <a href="events_manage.php">Manage events</a>
     <?php endif; ?>
