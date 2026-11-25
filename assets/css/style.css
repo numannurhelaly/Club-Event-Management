@@ -83,3 +83,11 @@ form.inline { display: inline; }
 .badge-registered { background: #e8f5ec; color: #276738; }
 .badge-attended { background: #e6f1fb; color: #0c447c; }
 .badge-absent { background: #fdecec; color: #a32d2d; }
+
+/* Schedule, check-in and event details */
+.section-title { font-size: 18px; margin: 28px 0 10px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 12px 0 16px; }
+.stat { background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; padding: 12px 14px; }
+.stat small { display: block; font-size: 12px; color: #667085; }
+.stat b { font-size: 22px; font-weight: 600; }
+.panel .event-foot { margin-top: 14px; }

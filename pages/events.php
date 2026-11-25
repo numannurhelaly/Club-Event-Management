@@ -42,6 +42,7 @@ require __DIR__ . '/../includes/header.php';
       <h3><?= e($ev['title']) ?></h3>
       <p class="muted"><?= e(date('D, d M Y', strtotime($ev['event_date']))) ?>, <?= e(substr($ev['start_time'], 0, 5)) ?> - <?= e(substr($ev['end_time'], 0, 5)) ?></p>
       <p class="muted"><?= e($ev['venue']) ?></p>
+      <p><a href="event_view.php?id=<?= (int)$ev['id'] ?>">Details &amp; schedule</a></p>
       <?php if ($ev['description']): ?><p class="desc"><?= e($ev['description']) ?></p><?php endif; ?>
       <div class="event-foot">
         <span class="seats"><?= $left > 0 ? $left . ' seats left' : 'Full' ?></span>

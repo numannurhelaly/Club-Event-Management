@@ -45,6 +45,9 @@
     c.appendChild(el('h3', {}, ev.title));
     c.appendChild(el('p', { 'class': 'muted' }, ev.date_label + ', ' + ev.time_label));
     c.appendChild(el('p', { 'class': 'muted' }, ev.venue));
+    var more = el('p');
+    more.appendChild(el('a', { href: 'event_view.php?id=' + ev.id }, 'Details & schedule'));
+    c.appendChild(more);
     if (ev.description) { c.appendChild(el('p', { 'class': 'desc' }, ev.description)); }
 
     var foot = el('div', { 'class': 'event-foot' });

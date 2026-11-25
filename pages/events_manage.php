@@ -54,6 +54,8 @@ require __DIR__ . '/../includes/header.php';
       <td><span class="badge badge-<?= e($ev['status']) ?>"><?= e($ev['status']) ?></span></td>
       <?php if ($isAdmin): ?><td><?= e($ev['organizer']) ?></td><?php endif; ?>
       <td class="actions">
+        <a class="btn" href="performances.php?event_id=<?= (int)$ev['id'] ?>">Schedule</a>
+        <a class="btn" href="checkin.php?event_id=<?= (int)$ev['id'] ?>">Check-in</a>
         <a class="btn" href="event_form.php?id=<?= (int)$ev['id'] ?>">Edit</a>
         <form method="post" action="event_delete.php" class="inline"
               onsubmit="return confirm('Delete this event and all its registrations?');">
