@@ -10,13 +10,14 @@ $categoryId = (int)($_GET['category'] ?? 0);
 $categories = $pdo->query('SELECT id, name FROM categories ORDER BY name')->fetchAll();
 $events     = fetch_public_events($pdo, $user['id'], $q, $categoryId);
 
-$pageTitle = 'Events';
+$pageTitle    = 'Events';
+$extraScripts = ['../assets/js/events.js'];   // live search (AJAX)
 require __DIR__ . '/../includes/header.php';
 ?>
 <h1>Upcoming events</h1>
 
 <form method="get" class="filter-bar" id="filter-form">
-  <input type="text" name="q" id="search-input" placeholder="Search by title or venue" value="<?= e($q) ?>">
+  <input type="text" name="q" id="search-input" placeholder="Search by title or venue" value="<?= e($q) ?>" autocomplete="off">
   <select name="category" id="category-filter">
     <option value="0">All categories</option>
     <?php foreach ($categories as $cat): ?>
@@ -26,7 +27,7 @@ require __DIR__ . '/../includes/header.php';
   <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
-<div id="events-list">
+<div id="events-list" data-csrf="<?= e(csrf_token()) ?>">
 <?php if (!$events): ?>
   <p class="muted" id="no-events">No upcoming events found.</p>
 <?php else: ?>
