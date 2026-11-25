@@ -1,5 +1,5 @@
 <?php
-// Shared event queries (also reused by the AJAX search in the next step).
+// Shared event queries and checks.
 
 // Published, upcoming events with seat count and this user's registration status.
 function fetch_public_events(PDO $pdo, int $userId, string $q = '', int $categoryId = 0): array {
@@ -29,4 +29,22 @@ function fetch_public_events(PDO $pdo, int $userId, string $q = '', int $categor
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
+}
+
+// Returns the event if this user may manage it (admin, or the organizer who created it).
+// Otherwise stops the request with 404 / 403.
+function get_manageable_event(PDO $pdo, int $eventId, array $user): array {
+    $stmt = $pdo->prepare('SELECT * FROM events WHERE id = ?');
+    $stmt->execute([$eventId]);
+    $event = $stmt->fetch();
+
+    if (!$event) {
+        http_response_code(404);
+        exit('Event not found.');
+    }
+    if ($user['role'] !== 'admin' && (int)$event['created_by'] !== (int)$user['id']) {
+        http_response_code(403);
+        exit('403 Forbidden: this is not your event.');
+    }
+    return $event;
 }
