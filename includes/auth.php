@@ -1,5 +1,7 @@
 <?php
-// Session, role check, CSRF and helper functions.
+// Session, role check, CSRF, flash messages and helper functions.
+date_default_timezone_set('Asia/Dhaka');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -47,5 +49,18 @@ function csrf_check() {
     ) {
         http_response_code(400);
         exit('Invalid request.');
+    }
+}
+
+// One-time message shown after a redirect. type: "success" or "error".
+function flash_set($type, $message) {
+    $_SESSION['flash'] = ['type' => $type, 'msg' => $message];
+}
+
+function flash_show() {
+    if (!empty($_SESSION['flash'])) {
+        $f = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        echo '<p class="' . e($f['type']) . '" id="flash">' . e($f['msg']) . '</p>';
     }
 }
