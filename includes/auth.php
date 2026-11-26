@@ -3,6 +3,8 @@
 date_default_timezone_set('Asia/Dhaka');
 
 if (session_status() === PHP_SESSION_NONE) {
+    // HttpOnly: JavaScript can't read the session cookie. SameSite=Lax: blocks most cross-site requests.
+    session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
     session_start();
 }
 require_once __DIR__ . '/../config/db.php';
