@@ -7,6 +7,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/../config/db.php';
 
+// Keep the session in sync with the database, so a role change or a
+// deactivated account takes effect immediately (no re-login needed).
+if (isset($_SESSION['user'])) {
+    $syncStmt = $pdo->prepare('SELECT name, role, is_active FROM users WHERE id = ?');
+    $syncStmt->execute([$_SESSION['user']['id']]);
+    $syncRow = $syncStmt->fetch();
+    if (!$syncRow || !$syncRow['is_active']) {
+        unset($_SESSION['user']);
+    } else {
+        $_SESSION['user']['name'] = $syncRow['name'];
+        $_SESSION['user']['role'] = $syncRow['role'];
+    }
+}
+
 function e($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }

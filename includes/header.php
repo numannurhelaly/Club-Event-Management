@@ -21,6 +21,11 @@ $navUser = current_user();
     <?php if ($navUser && in_array($navUser['role'], ['admin', 'organizer'], true)): ?>
       <a href="events_manage.php">Manage events</a>
     <?php endif; ?>
+    <?php if ($navUser && $navUser['role'] === 'admin'): ?>
+      <a href="admin_users.php">Users</a>
+      <a href="admin_categories.php">Categories</a>
+      <a href="admin_reports.php">Reports</a>
+    <?php endif; ?>
     <span class="spacer"></span>
     <?php if ($navUser): ?>
       <span class="who"><?= e($navUser['name']) ?> (<?= e($navUser['role']) ?>)</span>
