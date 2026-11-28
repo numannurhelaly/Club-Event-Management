@@ -55,41 +55,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$pageTitle = 'Create account';
+require __DIR__ . '/../includes/auth_open.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Register | Club Event System</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body>
-  <main class="card">
-    <h1>Create account</h1>
+    <h2>Create account</h2>
+    <p class="lead">Join to reserve seats at club events.</p>
+
     <?php foreach ($errors as $err): ?>
       <p class="error"><?= e($err) ?></p>
     <?php endforeach; ?>
+
     <form method="post" id="register-form">
       <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
       <label>Full name
-        <input type="text" name="name" id="name" value="<?= e($name) ?>" required>
+        <input type="text" name="name" id="name" value="<?= e($name) ?>" autocomplete="name" required>
       </label>
       <label>Email
-        <input type="email" name="email" id="email" value="<?= e($email) ?>" required>
+        <input type="email" name="email" id="email" value="<?= e($email) ?>" autocomplete="email" required>
       </label>
       <label>Student ID (optional)
         <input type="text" name="student_id" id="student_id" value="<?= e($student_id) ?>">
       </label>
-      <label>Password
-        <input type="password" name="password" id="password" required>
+      <label>Password (at least 8 characters)
+        <input type="password" name="password" id="password" autocomplete="new-password" required>
       </label>
       <label>Confirm password
-        <input type="password" name="confirm" id="confirm" required>
+        <input type="password" name="confirm" id="confirm" autocomplete="new-password" required>
       </label>
-      <button type="submit" id="register-btn">Register</button>
+      <button type="submit" class="btn btn-primary btn-block" id="register-btn">Create account</button>
     </form>
-    <p>Already have an account? <a href="login.php">Log in</a></p>
-  </main>
-</body>
-</html>
+    <p class="auth-note">Already have an account? <a href="login.php">Log in</a></p>
+<?php require __DIR__ . '/../includes/auth_close.php'; ?>

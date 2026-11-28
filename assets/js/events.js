@@ -1,4 +1,5 @@
 // Live search and category filter for the events page (AJAX with fetch).
+// Builds the same ticket markup as includes/ticket.php.
 (function () {
   'use strict';
 
@@ -12,7 +13,11 @@
   var timer      = null;
   var controller = null;
 
-  // Small helper to build elements. Text is always set with textContent (safe from XSS).
+  // Constant icon markup (never built from user data).
+  var ICON_CLOCK = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  var ICON_PIN   = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+
+  // Text is always set with textContent, so event titles can't inject HTML (XSS).
   function el(tag, attrs, text) {
     var node = document.createElement(tag);
     Object.keys(attrs || {}).forEach(function (k) { node.setAttribute(k, attrs[k]); });
@@ -24,14 +29,27 @@
     return el('input', { type: 'hidden', name: name, value: value });
   }
 
+  function meta(icon, text) {
+    var p = el('p', { 'class': 'ticket-meta' });
+    var i = el('span', { 'class': 'icon' });
+    i.innerHTML = icon;
+    p.appendChild(i);
+    p.appendChild(el('span', {}, text));
+    return p;
+  }
+
+  function seatsText(n) {
+    if (n <= 0) { return 'Full'; }
+    if (n <= 5) { return 'Only ' + n + ' left'; }
+    return n + ' seats left';
+  }
+
   function actionForm(ev, action) {
     var f = el('form', { method: 'post', action: 'event_register.php', 'class': 'inline' });
     f.appendChild(hidden('csrf', csrf));
     f.appendChild(hidden('event_id', ev.id));
     f.appendChild(hidden('action', action));
     if (action === 'cancel') {
-      f.appendChild(el('span', { 'class': 'badge badge-published' }, 'Registered'));
-      f.appendChild(document.createTextNode(' '));
       f.appendChild(el('button', { type: 'submit', 'class': 'btn btn-danger' }, 'Cancel'));
     } else {
       f.appendChild(el('button', { type: 'submit', 'class': 'btn btn-primary' }, 'Register'));
@@ -39,29 +57,47 @@
     return f;
   }
 
-  function card(ev) {
-    var c = el('div', { 'class': 'event-card', 'data-event-id': ev.id });
-    if (ev.category) { c.appendChild(el('span', { 'class': 'badge' }, ev.category)); }
-    c.appendChild(el('h3', {}, ev.title));
-    c.appendChild(el('p', { 'class': 'muted' }, ev.date_label + ', ' + ev.time_label));
-    c.appendChild(el('p', { 'class': 'muted' }, ev.venue));
-    var more = el('p');
-    more.appendChild(el('a', { href: 'event_view.php?id=' + ev.id }, 'Details & schedule'));
-    c.appendChild(more);
-    if (ev.description) { c.appendChild(el('p', { 'class': 'desc' }, ev.description)); }
+  function ticket(ev) {
+    var cls = 'ticket';
+    if (ev.is_registered) { cls += ' is-registered'; }
+    else if (ev.seats_left <= 0) { cls += ' is-full'; }
 
-    var foot = el('div', { 'class': 'event-foot' });
-    foot.appendChild(el('span', { 'class': 'seats' }, ev.seats_left > 0 ? ev.seats_left + ' seats left' : 'Full'));
+    var t    = el('article', { 'class': cls, 'data-event-id': ev.id });
+    var main = el('div', { 'class': 'ticket-main' });
+
+    var top = el('div', { 'class': 'ticket-top' });
+    top.appendChild(ev.category ? el('span', { 'class': 'badge' }, ev.category) : el('span'));
+    if (ev.is_registered) { top.appendChild(el('span', { 'class': 'stamp' }, "You're in")); }
+    main.appendChild(top);
+
+    var h = el('h3', { 'class': 'ticket-title' });
+    h.appendChild(el('a', { href: 'event_view.php?id=' + ev.id }, ev.title));
+    main.appendChild(h);
+
+    main.appendChild(meta(ICON_CLOCK, ev.time_label));
+    main.appendChild(meta(ICON_PIN, ev.venue));
+    if (ev.description) { main.appendChild(el('p', { 'class': 'ticket-desc' }, ev.description)); }
+
+    var actions = el('div', { 'class': 'ticket-actions' });
     if (ev.is_registered) {
-      foot.appendChild(actionForm(ev, 'cancel'));
+      actions.appendChild(actionForm(ev, 'cancel'));
     } else if (ev.can_register) {
-      foot.appendChild(actionForm(ev, 'register'));
+      actions.appendChild(actionForm(ev, 'register'));
     } else {
-      var full = el('button', { type: 'button', 'class': 'btn', disabled: 'disabled' }, 'Full');
-      foot.appendChild(full);
+      actions.appendChild(el('button', { type: 'button', 'class': 'btn', disabled: 'disabled' }, 'Full'));
     }
-    c.appendChild(foot);
-    return c;
+    actions.appendChild(el('a', { 'class': 'link-quiet', href: 'event_view.php?id=' + ev.id }, 'Details'));
+    main.appendChild(actions);
+
+    var stub = el('div', { 'class': 'ticket-stub' });
+    stub.appendChild(el('span', { 'class': 'stub-dow' }, ev.dow));
+    stub.appendChild(el('span', { 'class': 'stub-day' }, String(ev.day)));
+    stub.appendChild(el('span', { 'class': 'stub-month' }, ev.month_label));
+    stub.appendChild(el('span', { 'class': 'stub-seats' }, seatsText(ev.seats_left)));
+
+    t.appendChild(main);
+    t.appendChild(stub);
+    return t;
   }
 
   function showMessage(text, id) {
@@ -71,12 +107,12 @@
 
   function render(events) {
     if (!events.length) {
-      showMessage('No upcoming events found.', 'no-events');
+      showMessage('No shows match your search. Try another word or category.', 'no-events');
       return;
     }
     list.innerHTML = '';
-    var grid = el('div', { 'class': 'event-grid' });
-    events.forEach(function (ev) { grid.appendChild(card(ev)); });
+    var grid = el('div', { 'class': 'ticket-grid' });
+    events.forEach(function (ev) { grid.appendChild(ticket(ev)); });
     list.appendChild(grid);
   }
 
@@ -100,7 +136,7 @@
       .then(function (data) { if (data) { render(data.events); } })
       .catch(function (err) {
         if (err.name === 'AbortError') { return; }
-        showMessage('Could not load events. Please try again.', 'load-error');
+        showMessage('Could not load events. Check your connection and try again.', 'load-error');
       });
   }
 
